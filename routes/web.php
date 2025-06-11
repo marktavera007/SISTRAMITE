@@ -51,6 +51,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('clientes', [ClienteController::class, 'store'])->name('cliente.store');
     Route::post('clientes/{cliente}', [ClienteController::class, 'update'])->name('cliente.update');
     Route::delete('clientes/{cliente}', [ClienteController::class, 'destroy'])->name('cliente.destroy');
+    Route::post('clientes/{cliente}/password', [ClienteController::class, 'updatePassword'])->name('password.update');
+
 
     // Rutas de Areas
     Route::get('areas', [AreaController::class, 'index'])->name('area.index');

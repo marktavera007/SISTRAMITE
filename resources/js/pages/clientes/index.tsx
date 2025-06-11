@@ -1,3 +1,4 @@
+import ChangePasswordDialog from '@/components/clientes/cambiar-contraseña';
 import CrearClienteModal from '@/components/clientes/crear-modal';
 import EditarClienteModal from '@/components/clientes/editar-modal';
 import TextLink from '@/components/text-link';
@@ -61,7 +62,7 @@ export default function Clientes({ empleados, clientes }: { clientes: Cliente[];
                         >
                             {' '}
                             <Plus className="h-4 w-4" />
-                            Crear cliente
+                            Crear Proveedor
                         </button>
                     )}
                 </div>
@@ -126,6 +127,7 @@ export default function Clientes({ empleados, clientes }: { clientes: Cliente[];
                                                 <TextLink href={route('cliente.destroy', [cliente])} className="cursor-pointer" method="delete">
                                                     <Trash className="h-4 w-4" />
                                                 </TextLink>
+                                                <ChangePasswordDialog cliente={cliente} />
                                             </TableCell>
                                         </TableRow>
                                     );

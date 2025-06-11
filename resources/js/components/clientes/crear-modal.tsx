@@ -19,7 +19,6 @@ export default function CrearClienteModal({ isOpen, onClose, empleados }: { isOp
         name: '',
         email: '',
         empleado_id: '',
-        password: '',
         ruc: '',
         dni: '',
         foto: null,
@@ -101,7 +100,7 @@ export default function CrearClienteModal({ isOpen, onClose, empleados }: { isOp
                         </div>
 
                         {/* Campo para contraseña */}
-                        <div className="grid grid-cols-4 items-center gap-4">
+                        {/* <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="password" className="text-right">
                                 Contraseña <span className="text-lg text-red-500">*</span>
                             </Label>
@@ -115,7 +114,7 @@ export default function CrearClienteModal({ isOpen, onClose, empleados }: { isOp
                                 placeholder="Contraseña"
                             />
                             <InputError message={errors.password} className="col-span-4 col-start-2" />
-                        </div>
+                        </div> */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label className="text-right leading-snug">
                                 Asignar un empleado <span className="text-lg text-red-500">*</span>

@@ -10,7 +10,7 @@ class SeguimientoTramite extends Model
 
     use HasFactory;
 
-    protected $fillable = ['tramite_id', 'area_id', 'empleado_id', 'estado', 'fecha_derivacion'];
+    protected $fillable = ['tramite_id',  'empleado_id', 'estado', 'fecha_derivacion'];
 
     public function tramite()
     {

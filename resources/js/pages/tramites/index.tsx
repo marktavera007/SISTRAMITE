@@ -40,10 +40,6 @@ type EmpleadoLocal = {
     user_id: number;
 };
 
-type AreaLocal = {
-    id: number;
-    nombre: string;
-};
 type SeguimientoTramite = {
     id: number; // ID autoincrementable
     tramite_id: number; // Relación con la tabla tramites
@@ -56,7 +52,6 @@ type SeguimientoTramite = {
 };
 
 type Props = {
-    areas: AreaLocal[];
     clientes: ClienteLocal[];
     tramite: Tramite[];
     empleados: EmpleadoLocal[];
@@ -66,7 +61,6 @@ type Props = {
 
 export default function Tramites({
     clientes,
-    areas,
     tramite,
     empleados,
     seguimientosTramite = [], // Valor por defecto
@@ -76,6 +70,9 @@ export default function Tramites({
     const [isCrearModalOpen, setIsCrearModalOpen] = useState(false);
     const [tramiteSeleccionado, setTramiteSeleccionado] = useState<Tramite | null>(null);
     const [derivarModalOpen, setDerivarModalOpen] = useState(false);
+    const [isCrearSubModalOpen, setIsCrearSubModalOpen] = useState(false);
+
+    console.log('aquii:', tramite);
     const openCrearModal = () => setIsCrearModalOpen(true);
     const closeCrearModal = () => setIsCrearModalOpen(false);
 
@@ -101,7 +98,7 @@ export default function Tramites({
                         >
                             {' '}
                             <Plus className="h-4 w-4" />
-                            Crear Trámite
+                            Crear Orden
                         </button>
                     )}
                 </div>
@@ -109,31 +106,30 @@ export default function Tramites({
                     <Table>
                         <TableHeader className="bg-neutral-100">
                             <TableRow className="border-neutral-200 hover:bg-neutral-100">
-                                <TableHead>N° Expediente</TableHead>
-                                <TableHead>Registrado</TableHead>
-                                <TableHead>Creado por</TableHead>
-                                <TableHead>Cliente</TableHead>
-                                <TableHead>Area</TableHead>
+                                <TableHead>N° </TableHead>
+                                <TableHead>Orden de Compra</TableHead>
+                                <TableHead>Fecha de Emisión</TableHead>
                                 <TableHead>Estado</TableHead>
-                                <TableHead>Días Transc. </TableHead>
-                                <TableHead>Días de Respu. </TableHead>
+                                <TableHead>Creado por</TableHead>
+                                <TableHead>Nota de Ingreso</TableHead>
+                                <TableHead>Factura</TableHead>
+
+                                <TableHead>Fecha de Factura </TableHead>
                                 <TableHead>Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {tramite.length > 0 ? (
-                                tramite.map((tramite) => {
+                                tramite.map((tramite, index) => {
                                     return (
                                         <TableRow key={tramite.id}>
-                                            <TableCell>{tramite.numero_expediente}</TableCell>
+                                            <TableCell>{index + 1}</TableCell>
+                                            <TableCell>{tramite.orden_compra}</TableCell>
                                             <TableCell>
                                                 {tramite.created_at
                                                     ? new Date(tramite.created_at).toLocaleString() // Cambié a toLocaleString()
                                                     : 'No registrado'}
                                             </TableCell>
-                                            <TableCell>{tramite.creador?.nombre}</TableCell>
-                                            <TableCell>{tramite.cliente.user.name}</TableCell>
-                                            <TableCell>{tramite.area_destino_nombre}</TableCell>
                                             <TableCell>
                                                 {(() => {
                                                     const estadoMap = {
@@ -173,14 +169,11 @@ export default function Tramites({
                                                     );
                                                 })()}
                                             </TableCell>
+                                            <TableCell>{tramite.creador?.nombre}</TableCell>
+                                            <TableCell>{tramite.nota_ingreso}</TableCell>
+                                            <TableCell>{tramite.numero_factura}</TableCell>
 
-                                            <TableCell>
-                                                {Math.floor(Number(tramite.dias_pasados))}{' '}
-                                                {Math.floor(Number(tramite.dias_pasados)) === 1 ? 'día' : 'días'}
-                                            </TableCell>
-                                            <TableCell>
-                                                {tramite.dias_respuesta} {tramite.dias_respuesta === '1' ? 'día' : 'días'}
-                                            </TableCell>
+                                            <TableCell>{tramite.oc_dfecdoc ? tramite.oc_dfecdoc : 'No registrado'}</TableCell>
 
                                             <TableCell className="flex items-center gap-2">
                                                 <Dialog>
@@ -191,21 +184,21 @@ export default function Tramites({
                                                     </DialogTrigger>
                                                     <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-[700px]">
                                                         <DialogHeader>
-                                                            <DialogTitle>{tramite.numero_expediente}</DialogTitle>
-                                                            <DialogDescription>Consulte los detalles del trámite y del remitente.</DialogDescription>
+                                                            <DialogTitle>Orden de Compra</DialogTitle>
+                                                            <DialogDescription>
+                                                                Consulte los detalles de la orden, del remitente y seguimiento.
+                                                            </DialogDescription>
                                                         </DialogHeader>
 
                                                         <Tabs defaultValue="tramite" className="w-full">
-                                                            <TabsList className="grid w-full grid-cols-4">
+                                                            <TabsList className="grid w-full grid-cols-3">
                                                                 <TabsTrigger value="tramite" className="cursor-pointer">
                                                                     Datos de la Orden
                                                                 </TabsTrigger>
                                                                 <TabsTrigger value="remitente" className="cursor-pointer">
-                                                                    Remitente
+                                                                    Proveedor
                                                                 </TabsTrigger>
-                                                                <TabsTrigger value="detalle" className="cursor-pointer">
-                                                                    Detalle
-                                                                </TabsTrigger>
+
                                                                 <TabsTrigger value="seguimiento" className="cursor-pointer">
                                                                     Seguimiento
                                                                 </TabsTrigger>
@@ -216,48 +209,20 @@ export default function Tramites({
                                                                     <CardContent className="space-y-6">
                                                                         {/* SECCIÓN 1: INFORMACIÓN BÁSICA */}
                                                                         <div className="space-y-4">
-                                                                            <h3 className="text-muted-foreground text-sm font-medium">
+                                                                            <h3 className="text-muted-foreground text-sm font-bold">
                                                                                 Información Básica
                                                                             </h3>
                                                                             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                                                                 <div className="space-y-3">
                                                                                     <div>
                                                                                         <p className="text-muted-foreground text-sm font-medium">
-                                                                                            Expediente
-                                                                                        </p>
-                                                                                        <p className="text-sm">{tramite.numero_expediente}</p>
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <p className="text-muted-foreground text-sm font-medium">
                                                                                             Creado por
                                                                                         </p>
                                                                                         <p className="text-sm">{tramite.creador?.nombre}</p>
                                                                                     </div>
-                                                                                </div>
-
-                                                                                <div className="space-y-3">
                                                                                     <div>
-                                                                                        <p className="text-muted-foreground text-sm font-medium">
-                                                                                            Fecha
-                                                                                        </p>
-                                                                                        <p className="text-sm">
-                                                                                            {tramite.created_at
-                                                                                                ? new Date(tramite.created_at).toLocaleString()
-                                                                                                : 'No registrado'}
-                                                                                        </p>
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <p className="text-muted-foreground text-sm font-medium">
-                                                                                            Tipo de Trámite
-                                                                                        </p>
-                                                                                        <p className="text-sm">{tramite.tipo_documento}</p>
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                <div className="space-y-3">
-                                                                                    <div>
-                                                                                        <p className="text-muted-foreground text-sm font-medium">
-                                                                                            Estado
+                                                                                        <p className="text-muted-foreground mb-1 text-sm font-medium">
+                                                                                            Estado de la Orden
                                                                                         </p>
                                                                                         <p className="text-sm">
                                                                                             {(() => {
@@ -299,6 +264,29 @@ export default function Tramites({
                                                                                             })()}
                                                                                         </p>
                                                                                     </div>
+                                                                                </div>
+
+                                                                                <div className="space-y-3">
+                                                                                    <div>
+                                                                                        <p className="text-muted-foreground text-sm font-medium">
+                                                                                            Fecha de Emisión
+                                                                                        </p>
+                                                                                        <p className="text-sm">
+                                                                                            {tramite.created_at
+                                                                                                ? new Date(tramite.created_at).toLocaleString()
+                                                                                                : 'No registrado'}
+                                                                                        </p>
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <p className="text-muted-foreground text-sm font-medium">
+                                                                                            Tipo de Trámite
+                                                                                        </p>
+                                                                                        <p className="text-sm">{tramite.tipo_documento}</p>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <div className="space-y-3">
                                                                                     <div>
                                                                                         <p className="text-muted-foreground text-sm font-medium">
                                                                                             Nota de Ingreso
@@ -311,7 +299,7 @@ export default function Tramites({
 
                                                                         {/* SECCIÓN 2: DOCUMENTOS COMERCIALES */}
                                                                         <div className="space-y-4">
-                                                                            <h3 className="text-muted-foreground text-sm font-medium">
+                                                                            <h3 className="text-muted-foreground text-sm font-bold">
                                                                                 Documentos Comerciales
                                                                             </h3>
                                                                             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -330,62 +318,20 @@ export default function Tramites({
                                                                             </div>
                                                                         </div>
 
-                                                                        {/* SECCIÓN 3: INFORMACIÓN DE FACTURACIÓN */}
-                                                                        <div className="space-y-4">
-                                                                            <h3 className="text-muted-foreground text-sm font-medium">
-                                                                                Información de Facturación
-                                                                            </h3>
-                                                                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                                                                <div>
-                                                                                    <p className="text-muted-foreground text-sm font-medium">
-                                                                                        Forma de Pago
-                                                                                    </p>
-                                                                                    <p className="text-sm">{tramite.oc_cforpag || 'No registrado'}</p>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p className="text-muted-foreground text-sm font-medium">
-                                                                                        Código Moneda
-                                                                                    </p>
-                                                                                    <p className="text-sm">{tramite.oc_ccodmon || 'No registrado'}</p>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p className="text-muted-foreground text-sm font-medium">
-                                                                                        Fecha Documento
-                                                                                    </p>
-                                                                                    <p className="text-sm">
-                                                                                        {tramite.oc_dfecdoc
-                                                                                            ? new Date(tramite.oc_dfecdoc).toLocaleDateString()
-                                                                                            : 'No registrado'}
-                                                                                    </p>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p className="text-muted-foreground text-sm font-medium">
-                                                                                        Nombre Factura
-                                                                                    </p>
-                                                                                    <p className="text-sm">
-                                                                                        {tramite.oc_cfacnombre || 'No registrado'}
-                                                                                    </p>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p className="text-muted-foreground text-sm font-medium">
-                                                                                        RUC Factura
-                                                                                    </p>
-                                                                                    <p className="text-sm">{tramite.oc_cfacruc || 'No registrado'}</p>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p className="text-muted-foreground text-sm font-medium">
-                                                                                        Dirección Factura
-                                                                                    </p>
-                                                                                    <p className="text-sm">
-                                                                                        {tramite.oc_cfacdirec || 'No registrado'}
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
+                                                                        {/* SECCIÓN 3: ARCHIVOS ADJUNTOS */}
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setIsCrearSubModalOpen(true);
+                                                                                setTramiteSeleccionado(tramite);
+                                                                            }}
+                                                                            className="cursor-pointer text-sm text-blue-600 underline underline-offset-4 hover:text-blue-800"
+                                                                        >
+                                                                            Ver detalle de la orden
+                                                                        </button>
 
                                                                         {/* SECCIÓN 4: ARCHIVOS ADJUNTOS */}
                                                                         <div className="space-y-4">
-                                                                            <h3 className="text-muted-foreground text-sm font-medium">
+                                                                            <h3 className="text-muted-foreground text-sm font-bold">
                                                                                 Archivos Adjuntos
                                                                             </h3>
 
@@ -496,7 +442,7 @@ export default function Tramites({
                                                                         {/* SECCIÓN 2: DOCUMENTOS COMERCIALES */}
                                                                         <div className="space-y-4">
                                                                             <h3 className="text-muted-foreground text-sm font-medium">
-                                                                                Información del remitente
+                                                                                Información del proveedor
                                                                             </h3>
                                                                             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                                                                 <div>
@@ -534,63 +480,6 @@ export default function Tramites({
                                                                     </CardContent>
                                                                 </Card>
                                                             </TabsContent>
-                                                            <TabsContent value="detalle">
-                                                                <Card>
-                                                                    <CardContent className="space-y-4">
-                                                                        <p className="text-muted-foreground text-sm font-medium">
-                                                                            Lista de Productos
-                                                                        </p>
-
-                                                                        <table className="min-w-full table-auto">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">
-                                                                                        ID
-                                                                                    </th>
-                                                                                    <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">
-                                                                                        Código
-                                                                                    </th>
-                                                                                    <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">
-                                                                                        Producto
-                                                                                    </th>
-                                                                                    <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">
-                                                                                        Cantidad
-                                                                                    </th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                {Array.isArray(tramite.detalles) && tramite.detalles.length > 0 ? (
-                                                                                    tramite.detalles.map((detalle) => (
-                                                                                        <tr key={detalle.id_det} className="border-t">
-                                                                                            <td className="px-4 py-2 text-sm">
-                                                                                                {detalle.oc_citem ?? '-'}
-                                                                                            </td>
-                                                                                            <td className="px-4 py-2 text-sm">
-                                                                                                {detalle.oc_ccodigo ?? '-'}
-                                                                                            </td>
-                                                                                            <td className="px-4 py-2 text-sm">
-                                                                                                {detalle.oc_cdesref ?? '-'}
-                                                                                            </td>
-                                                                                            <td className="px-4 py-2 text-sm">
-                                                                                                {detalle.oc_ncantid ?? '-'}
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    ))
-                                                                                ) : (
-                                                                                    <tr className="border-t">
-                                                                                        <td
-                                                                                            colSpan={4}
-                                                                                            className="text-muted-foreground py-4 text-center text-sm"
-                                                                                        >
-                                                                                            No hay productos registrados
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                )}
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </CardContent>
-                                                                </Card>
-                                                            </TabsContent>
 
                                                             <TabsContent value="seguimiento">
                                                                 <Card>
@@ -606,9 +495,7 @@ export default function Tramites({
                                                                                         <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">
                                                                                             Fecha
                                                                                         </th>
-                                                                                        <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">
-                                                                                            Área
-                                                                                        </th>
+
                                                                                         <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">
                                                                                             Encargado a
                                                                                         </th>
@@ -629,13 +516,7 @@ export default function Tramites({
                                                                                                           ).toLocaleDateString()
                                                                                                         : '-'}
                                                                                                 </td>
-                                                                                                <td className="px-4 py-2 text-sm">
-                                                                                                    {
-                                                                                                        areas.find(
-                                                                                                            (a) => a.id === seguimiento.area_id,
-                                                                                                        )?.nombre
-                                                                                                    }
-                                                                                                </td>
+
                                                                                                 <td className="px-4 py-2 text-sm">
                                                                                                     {
                                                                                                         empleados.find(
@@ -686,9 +567,10 @@ export default function Tramites({
                                                         </div>
                                                     </DialogContent>
                                                 </Dialog>
-                                                {auth.user.role === 'cliente' && (
-                                                    <InvoiceUploadCell tramiteId={tramite.id} initialFileName={tramite.factura_subida} />
-                                                )}
+                                                {auth.user.role === 'cliente' &&
+                                                    (tramite.nota_ingreso || tramite.numero_factura || tramite.orden_compra) && (
+                                                        <InvoiceUploadCell tramiteId={tramite.id} initialFileName={tramite.factura_subida} />
+                                                    )}
                                                 {auth.user.role === 'empleado' ||
                                                     (auth.user.role === 'administrador' && (
                                                         <div className="flex gap-2">
@@ -741,16 +623,83 @@ export default function Tramites({
                         </TableBody>
                     </Table>
                 </div>
+                {/* SECCIÓN 3: INFORMACIÓN DE FACTURACIÓN */}
+                <Dialog open={isCrearSubModalOpen} onOpenChange={() => setIsCrearSubModalOpen(true)}>
+                    <DialogContent className="max-h-[60vh] max-w-3xl overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Detalle de la orden</DialogTitle>
+                            <DialogDescription className="hidden">asdsad</DialogDescription>
+                        </DialogHeader>
 
-                <CrearTramiteModal isOpen={isCrearModalOpen} onClose={closeCrearModal} clientes={clientes} areas={areas} />
+                        <div className="mt-2 mb-4 space-y-4">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                <div>
+                                    <p className="text-muted-foreground text-sm font-medium">Forma de Pago</p>
+                                    <p className="text-sm">{tramiteSeleccionado?.oc_cforpag || 'No registrado'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground text-sm font-medium">Moneda</p>
+                                    <p className="text-sm">{tramiteSeleccionado?.oc_ccodmon || 'No registrado'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground text-sm font-medium">Fecha Factura</p>
+                                    <p className="text-sm">{tramiteSeleccionado?.oc_dfecdoc ? tramiteSeleccionado?.oc_dfecdoc : 'No registrado'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground text-sm font-medium">Nombre de Proveedor</p>
+                                    <p className="text-sm">{tramiteSeleccionado?.oc_cfacnombre || 'No registrado'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground text-sm font-medium">RUC Proveedor</p>
+                                    <p className="text-sm">{tramiteSeleccionado?.oc_cfacruc || 'No registrado'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground text-sm font-medium">Dirección Proveedor</p>
+                                    <p className="text-sm">{tramiteSeleccionado?.oc_cfacdirec || 'No registrado'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <p className="text-sm font-medium text-black">Lista de Productos</p>
+
+                            <table className="min-w-full table-auto">
+                                <thead>
+                                    <tr>
+                                        <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">ID</th>
+                                        <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">Código</th>
+                                        <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">Producto</th>
+                                        <th className="text-muted-foreground px-4 py-2 text-left text-sm font-medium">Cantidad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Array.isArray(tramiteSeleccionado?.detalles) && tramiteSeleccionado?.detalles.length > 0 ? (
+                                        tramiteSeleccionado?.detalles.map((detalle) => (
+                                            <tr key={detalle.id_det} className="border-t">
+                                                <td className="px-4 py-2 text-sm">{detalle.oc_citem ?? '-'}</td>
+                                                <td className="px-4 py-2 text-sm">{detalle.oc_ccodigo ?? '-'}</td>
+                                                <td className="px-4 py-2 text-sm">{detalle.oc_cdesref ?? '-'}</td>
+                                                <td className="px-4 py-2 text-sm">{detalle.oc_ncantid ?? '-'}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr className="border-t">
+                                            <td colSpan={4} className="text-muted-foreground py-4 text-center text-sm">
+                                                No hay productos registrados
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button onClick={() => setIsCrearSubModalOpen(false)} className="text-end text-sm text-blue-600 hover:underline">
+                            Cerrar
+                        </button>
+                    </DialogContent>
+                </Dialog>
+                <CrearTramiteModal isOpen={isCrearModalOpen} onClose={closeCrearModal} clientes={clientes} />
                 {tramiteSeleccionado && (
-                    <DerivarModal
-                        tramite={tramiteSeleccionado}
-                        areas={areas}
-                        empleados={empleados}
-                        isOpen={derivarModalOpen}
-                        onClose={closeDerivarModal}
-                    />
+                    <DerivarModal tramite={tramiteSeleccionado} empleados={empleados} isOpen={derivarModalOpen} onClose={closeDerivarModal} />
                 )}
             </div>
         </AppLayout>

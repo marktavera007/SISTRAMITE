@@ -17,7 +17,6 @@ class Tramite extends Model
     protected $fillable = [
         'cliente_id',
         'empleado_id',
-        'area_id',
         'numero_expediente',
         'nota_ingreso',
         'orden_compra',
@@ -27,7 +26,6 @@ class Tramite extends Model
         'estado',
         'dias_pasados',
         'dias_respuesta',
-        'area_destino_id', // Si ya tienes la columna de área de destino
         'documento_subido', // Si tienes el campo para el documento
         'oc_cforpag',
         'oc_ccodmon',
@@ -100,7 +98,7 @@ class Tramite extends Model
         static::creating(function ($tramite) {
             if (empty($tramite->numero_expediente)) {
                 // Generar el número de expediente con un prefijo y un número incremental
-                $tramite->numero_expediente = 'EXP-' . str_pad(Tramite::max('id') + 1, 5, '0', STR_PAD_LEFT);
+                $tramite->numero_expediente = 'OC-' . str_pad(Tramite::max('id') + 1, 5, '0', STR_PAD_LEFT);
             }
         });
     }

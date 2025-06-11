@@ -27,7 +27,7 @@ const Notificaciones = () => {
                 } else if (Array.isArray(data.notifications)) {
                     setNotificaciones(data.notifications);
                 } else {
-                    console.error('Formato inesperado de notificaciones:', data);
+                    // console.error('Formato inesperado de notificaciones:', data);
                     setNotificaciones([]);
                 }
             } catch (error) {

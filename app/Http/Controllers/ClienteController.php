@@ -76,7 +76,7 @@ class ClienteController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->ruc),
             'role' => 'cliente', // Fijamos el rol como 'empleado'
         ]);
 
@@ -95,21 +95,34 @@ class ClienteController extends Controller
         Cliente::create($data);
 
         //Enviar credenciales por correo
-        $user->notify(new CredencialesClienteNotification($user->name, $user->email, $request->password));
-        // Enviar un correo simple
-        // $toEmail = $user->email;
-        // $subject = 'Bienvenido a nuestra plataforma';
-        // $message = 'Hola ' . $user->name . ',\n\nTu cuenta ha sido creada con éxito. Tu correo es: ' . $user->email . ' y tu contraseña es: ' . $request->password . '\n\n¡Gracias por unirte!';
-        // $message = "Hola {$user->name},\n\nTu cuenta ha sido creada.\nEmail: {$user->email}\nContraseña: {$request->password}\n\nGracias por registrarte.";
+        $user->notify(new CredencialesClienteNotification($user->name, $user->email, $request->ruc));
 
-        // Mail::raw($message, function ($msg) use ($user) {
-        //     $msg->to($user->email)
-        //         ->subject('Tus credenciales de acceso');
-        // });
-
-        // Redireccionar a la lista de empleados
         return to_route('cliente.index')->with('success', 'Empleado creado correctamente.');
     }
+
+
+    public function updatePassword(Request $request, Cliente $cliente)
+    {
+        $request->validate([
+            'new_password' => ['required', 'confirmed', 'min:8'],
+        ], [
+            'new_password.required' => 'La nueva contraseña es obligatoria.',
+            'new_password.confirmed' => 'Las contraseñas no coinciden.',
+            'new_password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+        ]);
+
+        $userCliente = $cliente->user;
+
+        // Actualiza la contraseña solo del usuario asociado al cliente seleccionado
+        $userCliente->password = Hash::make($request->new_password);
+        $userCliente->save();
+
+        return to_route('cliente.index')->with('success', 'Contraseña actualizada correctamente.');
+    }
+
+
+
+
 
     /**
      * Display the specified resource.

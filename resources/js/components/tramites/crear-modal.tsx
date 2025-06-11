@@ -19,32 +19,37 @@ type ClienteLocal = {
     user_id: number;
 };
 
-type AreaLocal = {
-    id: number;
-    nombre: string;
-};
+// type AreaLocal = {
+//     id: number;
+//     nombre: string;
+// };
 
-export default function CrearTramiteModal({
-    isOpen,
-    onClose,
-    areas,
-    clientes,
-}: {
-    isOpen: boolean;
-    onClose: () => void;
-    areas: AreaLocal[];
-    clientes: ClienteLocal[];
-}) {
+export default function CrearTramiteModal({ isOpen, onClose, clientes }: { isOpen: boolean; onClose: () => void; clientes: ClienteLocal[] }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         cliente_id: '', // Cliente seleccionado
-        area_id: '', // Área seleccionada
-        area_destino_id: '', // Área de destino
+
         nota_ingreso: '',
         orden_compra: '',
         numero_factura: '',
         tipo_documento: '',
         dias_respuesta: '', // Días de respuesta
         documento_subido: null as File | null,
+
+        oc_cforpag: '',
+        oc_ccodmon: '',
+        oc_dfecdoc: '',
+        oc_cfacnombre: '',
+        oc_cfacruc: '',
+        oc_cfacdirec: '',
+
+        productos: [
+            {
+                oc_citem: '',
+                oc_ccodigo: '',
+                oc_cdesref: '',
+                oc_ncantid: '',
+            },
+        ],
     });
 
     const submit = (e: React.FormEvent) => {
@@ -52,8 +57,6 @@ export default function CrearTramiteModal({
         const formData = {
             ...data,
             cliente_id: Number(data.cliente_id), // Convertir a número
-            area_id: Number(data.area_id), // Convertir a número
-            area_destino_id: Number(data.area_destino_id), // Convertir a número
         };
 
         console.log(formData);
@@ -67,9 +70,9 @@ export default function CrearTramiteModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="h-[80vh] overflow-y-auto border-none sm:max-w-[500px]">
+            <DialogContent className="h-[70vh] overflow-y-auto border-none sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Crear Trámite</DialogTitle>
+                    <DialogTitle>Crear Orden</DialogTitle>
                     <DialogDescription>Ingrese los datos para crear un nuevo trámite.</DialogDescription>
                 </DialogHeader>
 
@@ -78,14 +81,14 @@ export default function CrearTramiteModal({
                         {/* Cliente */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="cliente_id" className="text-right">
-                                Cliente <span className="text-lg text-red-500">*</span>
+                                Proveedor <span className="text-lg text-red-500">*</span>
                             </Label>
                             <Select
                                 value={data.cliente_id} // Valor inicial vacío
                                 onValueChange={(value) => setData('cliente_id', value)}
                             >
                                 <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Selecciona un cliente" />
+                                    <SelectValue placeholder="Selecciona un proveedor" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {clientes.map((cliente) => (
@@ -95,53 +98,9 @@ export default function CrearTramiteModal({
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <InputError message={errors.cliente_id} className="mt-2" />
+                            <InputError message={errors.cliente_id} className="col-span-5 w-full text-start" />
                         </div>
 
-                        {/* Área */}
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right">
-                                Área de inicio <span className="text-lg text-red-500">*</span>
-                            </Label>
-                            <Select
-                                value={data.area_id} // Valor inicial vacío
-                                onValueChange={(value) => setData('area_id', value)}
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Selecciona un área" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {areas.map((area) => (
-                                        <SelectItem key={area.id} value={area.id.toString()}>
-                                            {area.nombre}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={errors.area_id} className="mt-2" />
-                        </div>
-                        {/* Área */}
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right">
-                                Área de destino <span className="text-lg text-red-500">*</span>
-                            </Label>
-                            <Select
-                                value={data.area_destino_id} // Valor inicial vacío
-                                onValueChange={(value) => setData('area_destino_id', value)}
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Selecciona un área" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {areas.map((area) => (
-                                        <SelectItem key={area.id} value={area.id.toString()}>
-                                            {area.nombre}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={errors.area_destino_id} className="mt-2" />
-                        </div>
                         {/* Documento */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="documento_subido" className="text-right">
@@ -245,27 +204,185 @@ export default function CrearTramiteModal({
                                 className="col-span-3"
                                 placeholder="Tipo de documento"
                             />
-                            <InputError message={errors.tipo_documento} className="mt-2" />
+                            <InputError message={errors.tipo_documento} className="col-span-5 mt-2" />
+                        </div>
+                        {/* campos nuevos */}
+                        {/* Forma de pago */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="oc_cforpag" className="text-right">
+                                Forma de Pago
+                            </Label>
+                            <Input
+                                id="oc_cforpag"
+                                value={data.oc_cforpag}
+                                onChange={(e) => setData('oc_cforpag', e.target.value)}
+                                type="text"
+                                disabled={processing}
+                                className="col-span-3"
+                            />
                         </div>
 
-                        {/* Estado */}
-                        {/* <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right">Estado</Label>
-                            <Select value={data.estado} onValueChange={(value) => setData('estado', value)}>
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Selecciona un estado" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectItem value="pendiente">Pendiente</SelectItem>
-                                        <SelectItem value="en_proceso">En Proceso</SelectItem>
-                                        <SelectItem value="completado">Completado</SelectItem>
-                                        <SelectItem value="cancelado">Cancelado</SelectItem>
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                            <InputError message={errors.estado} className="mt-2" />
-                        </div> */}
+                        {/* Moneda */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="oc_ccodmon" className="text-right">
+                                Moneda
+                            </Label>
+                            <Input
+                                id="oc_ccodmon"
+                                value={data.oc_ccodmon}
+                                onChange={(e) => setData('oc_ccodmon', e.target.value)}
+                                type="text"
+                                disabled={processing}
+                                className="col-span-3"
+                            />
+                        </div>
+
+                        {/* Fecha */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="oc_dfecdoc" className="text-right">
+                                Fecha de Documento
+                            </Label>
+                            <Input
+                                id="oc_dfecdoc"
+                                value={data.oc_dfecdoc}
+                                onChange={(e) => setData('oc_dfecdoc', e.target.value)}
+                                type="text"
+                                disabled={processing}
+                                className="col-span-3"
+                            />
+                        </div>
+
+                        {/* Nombre factura */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="oc_cfacnombre" className="text-right">
+                                Nombre Factura
+                            </Label>
+                            <Input
+                                id="oc_cfacnombre"
+                                value={data.oc_cfacnombre}
+                                onChange={(e) => setData('oc_cfacnombre', e.target.value)}
+                                type="text"
+                                disabled={processing}
+                                className="col-span-3"
+                            />
+                        </div>
+
+                        {/* RUC */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="oc_cfacruc" className="text-right">
+                                RUC Factura
+                            </Label>
+                            <Input
+                                id="oc_cfacruc"
+                                value={data.oc_cfacruc}
+                                onChange={(e) => setData('oc_cfacruc', e.target.value)}
+                                type="text"
+                                disabled={processing}
+                                className="col-span-3"
+                            />
+                        </div>
+
+                        {/* Dirección */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="oc_cfacdirec" className="text-right">
+                                Dirección Factura
+                            </Label>
+                            <Input
+                                id="oc_cfacdirec"
+                                value={data.oc_cfacdirec}
+                                onChange={(e) => setData('oc_cfacdirec', e.target.value)}
+                                type="text"
+                                disabled={processing}
+                                className="col-span-3"
+                            />
+                        </div>
+
+                        {/* Productos */}
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">Productos</h3>
+                            <Button
+                                type="button"
+                                onClick={() =>
+                                    setData('productos', [...data.productos, { oc_citem: '', oc_ccodigo: '', oc_cdesref: '', oc_ncantid: '' }])
+                                }
+                                className="h-7 w-fit rounded-lg text-xs"
+                            >
+                                + Agregar
+                            </Button>
+                        </div>
+                        {data.productos.map((producto, index) => (
+                            <div key={index} className="grid grid-cols-1 items-center gap-4">
+                                <Input
+                                    placeholder="Código"
+                                    value={producto.oc_ccodigo}
+                                    onChange={(e) =>
+                                        setData(
+                                            'productos',
+                                            data.productos.map((p, i) => (i === index ? { ...p, oc_ccodigo: e.target.value } : p)),
+                                        )
+                                    }
+                                    className="col-span-1"
+                                />
+                                <InputError message={(errors as Record<string, string>)[`productos.${index}.oc_ccodigo`]} />
+
+                                <Input
+                                    placeholder="Código Ítem"
+                                    value={producto.oc_citem}
+                                    onChange={(e) =>
+                                        setData(
+                                            'productos',
+                                            data.productos.map((p, i) => (i === index ? { ...p, oc_citem: e.target.value } : p)),
+                                        )
+                                    }
+                                    className="col-span-1"
+                                />
+                                <InputError message={(errors as Record<string, string>)[`productos.${index}.oc_citem`]} />
+
+                                <Input
+                                    placeholder="Descripción"
+                                    value={producto.oc_cdesref}
+                                    onChange={(e) =>
+                                        setData(
+                                            'productos',
+                                            data.productos.map((p, i) => (i === index ? { ...p, oc_cdesref: e.target.value } : p)),
+                                        )
+                                    }
+                                    className="col-span-1"
+                                />
+                                <InputError message={(errors as Record<string, string>)[`productos.${index}.oc_cdesref`]} />
+
+                                <Input
+                                    placeholder="Cantidad"
+                                    type="number"
+                                    value={producto.oc_ncantid}
+                                    onChange={(e) =>
+                                        setData(
+                                            'productos',
+                                            data.productos.map((p, i) => (i === index ? { ...p, oc_ncantid: e.target.value } : p)),
+                                        )
+                                    }
+                                    className="col-span-1"
+                                />
+                                <InputError message={(errors as Record<string, string>)[`productos.${index}.oc_ncantid`]} />
+
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    className="h-7 w-fit rounded-lg text-xs"
+                                    onClick={() =>
+                                        setData(
+                                            'productos',
+                                            data.productos.filter((_, i) => i !== index),
+                                        )
+                                    }
+                                >
+                                    Eliminar
+                                </Button>
+                            </div>
+                        ))}
+                        {/* <InputError message={errors.productos} className="mt-1" /> */}
+                        {typeof errors.productos === 'string' && <InputError message={errors.productos} />}
                     </div>
 
                     <DialogFooter>
