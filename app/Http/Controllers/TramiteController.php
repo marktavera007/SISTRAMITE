@@ -213,11 +213,19 @@ class TramiteController extends Controller
     /**
      * Derivar un trámite a otra área.
      */
+
     public function derivarTramite(Request $request, Tramite $tramite)
     {
         $request->validate([
-            'empleado_id' => 'required|exists:empleados,id',  // El empleado al que se deriva
+            'empleado_id' => 'required|exists:empleados,id',
+            'oc_aprobacioncompras' => 'accepted',
+        ], [
+            'empleado_id.required' => 'Debes seleccionar un empleado responsable.',
+            'empleado_id.exists' => 'El empleado seleccionado no existe.',
+            'oc_aprobacioncompras.accepted' => 'Debes aprobar la orden de compra antes de derivar.',
         ]);
+
+
 
         // Validar que no se derive a la misma área
         // if ($tramite->area_destino_id == $request->area_destino_id) {
@@ -247,9 +255,9 @@ class TramiteController extends Controller
 
             // 3. Actualizar el trámite: el área destino pasa a ser el área actual
             $tramite->update([
-
-                'empleado_id' => $request->empleado_id, // El empleado a quien se asigna el trámite
-                'estado' => 'pendiente', // Estado del trámite: derivado
+                'empleado_id' => $request->empleado_id,
+                'estado' => 'pendiente',
+                'oc_aprobacioncompras' => true, // ✅ Aquí lo marcas como aprobado
             ]);
         });
         // Obtener el empleado al que se derivó el trámite

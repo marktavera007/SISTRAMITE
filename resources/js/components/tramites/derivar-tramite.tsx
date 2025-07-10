@@ -2,6 +2,7 @@ import { Label } from '@/components/ui/label';
 import { Tramite } from '@/types';
 import { useForm } from '@inertiajs/react';
 
+import { Checkbox } from '../ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
@@ -23,8 +24,12 @@ type Props = {
 };
 
 const DerivarModal: React.FC<Props> = ({ tramite, empleados, isOpen, onClose }) => {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        empleado_id: '', // Aseguramos que el valor sea un string
+    const { data, setData, post, processing, errors, reset } = useForm<{
+        empleado_id: string;
+        oc_aprobacioncompras: boolean;
+    }>({
+        empleado_id: '',
+        oc_aprobacioncompras: false,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -62,6 +67,15 @@ const DerivarModal: React.FC<Props> = ({ tramite, empleados, isOpen, onClose }) 
                         </Select>
                         {errors.empleado_id && <p className="text-sm text-red-500">{errors.empleado_id}</p>}
                     </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox
+                            id="oc_aprobacioncompras"
+                            checked={data.oc_aprobacioncompras}
+                            onCheckedChange={(checked) => setData('oc_aprobacioncompras', checked === true)}
+                        />
+                        <Label htmlFor="oc_aprobacioncompras">Aprobar orden de compras</Label>
+                    </div>
+                    {errors.oc_aprobacioncompras && <p className="text-sm text-red-500">{errors.oc_aprobacioncompras}</p>}
 
                     <div className="flex justify-end gap-2 pt-4">
                         <button type="submit" disabled={processing} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50">

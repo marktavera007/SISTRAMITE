@@ -33,6 +33,8 @@ class Tramite extends Model
         'oc_cfacnombre',
         'oc_cfacruc',
         'oc_cfacdirec',
+        'oc_fechaestimadapago',
+        'oc_aprobacioncompras',
     ];
 
     // Si es necesario deshabilitar la creación automática de timestamps

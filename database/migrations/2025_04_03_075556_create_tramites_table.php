@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('orden_compra')->nullable(); // Orden de compra
             $table->string('numero_factura')->nullable(); // Número de factura
             $table->string('tipo_documento'); // Tipo de documento (Ej. Informe, Solicitud)
+            $table->string('oc_fechaestimadapago', 255)->nullable();
+            $table->boolean('oc_aprobacioncompras')->default(false);
             $table->enum('estado', ['pendiente', 'en_proceso', 'completado', 'cancelado'])->default('pendiente'); // Define los posibles estados
             $table->timestamps();
         });

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('oc_cdesref', 255);
             $table->integer('oc_ncantid');
 
+
             // Define la clave foránea
             $table->foreign('id_tramite')->references('id')->on('tramites')->onDelete('cascade');
 

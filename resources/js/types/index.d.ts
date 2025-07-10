@@ -133,6 +133,9 @@ export type Tramite = {
     oc_cfacnombre?: string;
     oc_cfacruc?: string;
     oc_cfacdirec?: string;
+    oc_fechaestimadapago?: string;
+    oc_fechaestimadapago?: string;
+    oc_aprobacioncompras?: string;
     detalles: TramiteDetail[];
 };
 

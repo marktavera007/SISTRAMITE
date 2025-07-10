@@ -109,6 +109,8 @@ export default function Tramites({
                                 <TableHead>N° </TableHead>
                                 <TableHead>Orden de Compra</TableHead>
                                 <TableHead>Fecha de Emisión</TableHead>
+                                <TableHead>Fecha estimada de pago</TableHead>
+                                <TableHead>Aprobacion de compras</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead>Creado por</TableHead>
                                 <TableHead>Nota de Ingreso</TableHead>
@@ -129,6 +131,14 @@ export default function Tramites({
                                                 {tramite.created_at
                                                     ? new Date(tramite.created_at).toLocaleString() // Cambié a toLocaleString()
                                                     : 'No registrado'}
+                                            </TableCell>
+                                            <TableCell>{tramite.oc_fechaestimadapago ? tramite.oc_fechaestimadapago : 'No registrado'}</TableCell>
+                                            <TableCell>
+                                                {tramite.oc_aprobacioncompras ? (
+                                                    <span className="font-medium text-green-600">✅ Aprobado</span>
+                                                ) : (
+                                                    <span className="font-medium text-red-500">❌ No aprobado</span>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 {(() => {
@@ -615,7 +625,7 @@ export default function Tramites({
                                 })
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="py-4 text-center">
+                                    <TableCell colSpan={9} className="py-4 text-center">
                                         No hay usuarios registrados.
                                     </TableCell>
                                 </TableRow>
