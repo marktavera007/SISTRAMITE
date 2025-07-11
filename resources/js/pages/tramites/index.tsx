@@ -10,15 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData, Tramite, TramiteDetail, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+
+import { format } from 'date-fns';
 import { ArrowRight, FileDown, FileText, Plus } from 'lucide-react';
 import { useState } from 'react';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Lista de Órdenes',
         href: '/areas',
     },
 ];
-
 type ClienteLocal = {
     id: number;
     dni?: string;
@@ -85,6 +87,12 @@ export default function Tramites({
         setDerivarModalOpen(false);
     };
 
+    function parseDateOnlyAsLocal(dateValue: string | Date) {
+        const dateString = String(dateValue);
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day, 0, 0, 0);
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Empleados" />
@@ -129,10 +137,14 @@ export default function Tramites({
                                             <TableCell>{tramite.orden_compra}</TableCell>
                                             <TableCell>
                                                 {tramite.created_at
-                                                    ? new Date(tramite.created_at).toLocaleString() // Cambié a toLocaleString()
+                                                    ? format(new Date(tramite.created_at.replace(' ', 'T')), 'yyyy-MM-dd HH:mm:ss')
                                                     : 'No registrado'}
                                             </TableCell>
-                                            <TableCell>{tramite.oc_fechaestimadapago ? tramite.oc_fechaestimadapago : 'No registrado'}</TableCell>
+                                            <TableCell>
+                                                {tramite.oc_fechaestimadapago
+                                                    ? format(parseDateOnlyAsLocal(tramite.oc_fechaestimadapago), 'yyyy-MM-dd HH:mm:ss')
+                                                    : 'No registrado'}
+                                            </TableCell>
                                             <TableCell>
                                                 {tramite.oc_aprobacioncompras ? (
                                                     <span className="font-medium text-green-600">✅ Aprobado</span>
@@ -183,7 +195,11 @@ export default function Tramites({
                                             <TableCell>{tramite.nota_ingreso}</TableCell>
                                             <TableCell>{tramite.numero_factura}</TableCell>
 
-                                            <TableCell>{tramite.oc_dfecdoc ? tramite.oc_dfecdoc : 'No registrado'}</TableCell>
+                                            <TableCell>
+                                                {tramite.oc_dfecdoc
+                                                    ? format(new Date(tramite.oc_dfecdoc.replace(' ', 'T')), 'yyyy-MM-dd HH:mm:ss')
+                                                    : 'No registrado'}
+                                            </TableCell>
 
                                             <TableCell className="flex items-center gap-2">
                                                 <Dialog>
@@ -577,7 +593,10 @@ export default function Tramites({
                                                         </div>
                                                     </DialogContent>
                                                 </Dialog>
+
                                                 {auth.user.role === 'cliente' &&
+                                                    tramite.nota_ingreso &&
+                                                    tramite.numero_factura &&
                                                     (tramite.nota_ingreso || tramite.numero_factura || tramite.orden_compra) && (
                                                         <InvoiceUploadCell tramiteId={tramite.id} initialFileName={tramite.factura_subida} />
                                                     )}
@@ -612,7 +631,7 @@ export default function Tramites({
                                                                     onClick={() => openDerivarModal(tramite)}
                                                                 >
                                                                     <ArrowRight className="h-3 w-3" />
-                                                                    <span>Derivar</span>
+                                                                    <span>Aprobar</span>
                                                                 </Button>
                                                                 <FinalizarButton tramite={{ id: tramite.id, estado: tramite.estado }} />
                                                             </div>

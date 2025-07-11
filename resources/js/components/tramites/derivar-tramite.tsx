@@ -46,7 +46,7 @@ const DerivarModal: React.FC<Props> = ({ tramite, empleados, isOpen, onClose }) 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
+                <DialogHeader className="hidden">
                     <DialogTitle>Derivar orden {tramite.numero_expediente}</DialogTitle>
                     <DialogDescription>Selecciona el empleado para derivar la Orden.</DialogDescription>
                 </DialogHeader>
@@ -79,7 +79,7 @@ const DerivarModal: React.FC<Props> = ({ tramite, empleados, isOpen, onClose }) 
 
                     <div className="flex justify-end gap-2 pt-4">
                         <button type="submit" disabled={processing} className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50">
-                            {processing ? 'Derivando...' : 'Derivar'}
+                            {processing ? 'Aprobando...' : 'Aprobar'}
                         </button>
                     </div>
                 </form>
