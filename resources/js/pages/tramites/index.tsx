@@ -594,12 +594,9 @@ export default function Tramites({
                                                     </DialogContent>
                                                 </Dialog>
 
-                                                {auth.user.role === 'cliente' &&
-                                                    tramite.nota_ingreso &&
-                                                    tramite.numero_factura &&
-                                                    (tramite.nota_ingreso || tramite.numero_factura || tramite.orden_compra) && (
-                                                        <InvoiceUploadCell tramiteId={tramite.id} initialFileName={tramite.factura_subida} />
-                                                    )}
+                                                {auth.user.role === 'cliente' && tramite.nota_ingreso && tramite.numero_factura && (
+                                                    <InvoiceUploadCell tramiteId={tramite.id} initialFileName={tramite.factura_subida} />
+                                                )}
                                                 {auth.user.role === 'empleado' ||
                                                     (auth.user.role === 'administrador' && (
                                                         <div className="flex gap-2">
